@@ -1,0 +1,496 @@
+{
+  "name": "sp500_pe",
+  "display_name": "S&P 500 PE Ratio (TTM)",
+  "description": "S&P 500 trailing twelve months price-to-earnings ratio",
+  "updated_at": "2026-02-21T16:37:56.866571+00:00",
+  "data": [
+    {
+      "date": "Jan 2015",
+      "value": 20.02
+    },
+    {
+      "date": "Feb 2015",
+      "value": 20.51
+    },
+    {
+      "date": "Mar 2015",
+      "value": 20.14
+    },
+    {
+      "date": "Apr 2015",
+      "value": 20.56
+    },
+    {
+      "date": "May 2015",
+      "value": 20.77
+    },
+    {
+      "date": "Jun 2015",
+      "value": 20.42
+    },
+    {
+      "date": "Jul 2015",
+      "value": 20.81
+    },
+    {
+      "date": "Aug 2015",
+      "value": 19.85
+    },
+    {
+      "date": "Sep 2015",
+      "value": 19.41
+    },
+    {
+      "date": "Oct 2015",
+      "value": 20.62
+    },
+    {
+      "date": "Nov 2015",
+      "value": 21.05
+    },
+    {
+      "date": "Dec 2015",
+      "value": 20.76
+    },
+    {
+      "date": "Jan 2016",
+      "value": 19.94
+    },
+    {
+      "date": "Feb 2016",
+      "value": 19.58
+    },
+    {
+      "date": "Mar 2016",
+      "value": 20.69
+    },
+    {
+      "date": "Apr 2016",
+      "value": 21.1
+    },
+    {
+      "date": "May 2016",
+      "value": 21.24
+    },
+    {
+      "date": "Jun 2016",
+      "value": 21.05
+    },
+    {
+      "date": "Jul 2016",
+      "value": 21.67
+    },
+    {
+      "date": "Aug 2016",
+      "value": 21.84
+    },
+    {
+      "date": "Sep 2016",
+      "value": 21.56
+    },
+    {
+      "date": "Oct 2016",
+      "value": 21.2
+    },
+    {
+      "date": "Nov 2016",
+      "value": 21.78
+    },
+    {
+      "date": "Dec 2016",
+      "value": 22.18
+    },
+    {
+      "date": "Jan 2017",
+      "value": 22.37
+    },
+    {
+      "date": "Feb 2017",
+      "value": 22.89
+    },
+    {
+      "date": "Mar 2017",
+      "value": 22.68
+    },
+    {
+      "date": "Apr 2017",
+      "value": 23.12
+    },
+    {
+      "date": "May 2017",
+      "value": 23.45
+    },
+    {
+      "date": "Jun 2017",
+      "value": 23.22
+    },
+    {
+      "date": "Jul 2017",
+      "value": 23.58
+    },
+    {
+      "date": "Aug 2017",
+      "value": 23.31
+    },
+    {
+      "date": "Sep 2017",
+      "value": 23.75
+    },
+    {
+      "date": "Oct 2017",
+      "value": 24.01
+    },
+    {
+      "date": "Nov 2017",
+      "value": 24.34
+    },
+    {
+      "date": "Dec 2017",
+      "value": 24.97
+    },
+    {
+      "date": "Jan 2018",
+      "value": 25.52
+    },
+    {
+      "date": "Feb 2018",
+      "value": 23.06
+    },
+    {
+      "date": "Mar 2018",
+      "value": 22.15
+    },
+    {
+      "date": "Apr 2018",
+      "value": 22.53
+    },
+    {
+      "date": "May 2018",
+      "value": 23.17
+    },
+    {
+      "date": "Jun 2018",
+      "value": 23.42
+    },
+    {
+      "date": "Jul 2018",
+      "value": 24.04
+    },
+    {
+      "date": "Aug 2018",
+      "value": 24.38
+    },
+    {
+      "date": "Sep 2018",
+      "value": 24.15
+    },
+    {
+      "date": "Oct 2018",
+      "value": 21.7
+    },
+    {
+      "date": "Nov 2018",
+      "value": 21.45
+    },
+    {
+      "date": "Dec 2018",
+      "value": 19.5
+    },
+    {
+      "date": "Jan 2019",
+      "value": 20.78
+    },
+    {
+      "date": "Feb 2019",
+      "value": 21.33
+    },
+    {
+      "date": "Mar 2019",
+      "value": 21.58
+    },
+    {
+      "date": "Apr 2019",
+      "value": 22.15
+    },
+    {
+      "date": "May 2019",
+      "value": 20.82
+    },
+    {
+      "date": "Jun 2019",
+      "value": 21.76
+    },
+    {
+      "date": "Jul 2019",
+      "value": 22.04
+    },
+    {
+      "date": "Aug 2019",
+      "value": 21.51
+    },
+    {
+      "date": "Sep 2019",
+      "value": 22.08
+    },
+    {
+      "date": "Oct 2019",
+      "value": 22.42
+    },
+    {
+      "date": "Nov 2019",
+      "value": 23.15
+    },
+    {
+      "date": "Dec 2019",
+      "value": 23.87
+    },
+    {
+      "date": "Jan 2020",
+      "value": 24.12
+    },
+    {
+      "date": "Feb 2020",
+      "value": 22.48
+    },
+    {
+      "date": "Mar 2020",
+      "value": 19.96
+    },
+    {
+      "date": "Apr 2020",
+      "value": 22.34
+    },
+    {
+      "date": "May 2020",
+      "value": 24.81
+    },
+    {
+      "date": "Jun 2020",
+      "value": 26.1
+    },
+    {
+      "date": "Jul 2020",
+      "value": 28.45
+    },
+    {
+      "date": "Aug 2020",
+      "value": 30.12
+    },
+    {
+      "date": "Sep 2020",
+      "value": 29.53
+    },
+    {
+      "date": "Oct 2020",
+      "value": 30.84
+    },
+    {
+      "date": "Nov 2020",
+      "value": 35.12
+    },
+    {
+      "date": "Dec 2020",
+      "value": 37.11
+    },
+    {
+      "date": "Jan 2021",
+      "value": 39.5
+    },
+    {
+      "date": "Feb 2021",
+      "value": 38.97
+    },
+    {
+      "date": "Mar 2021",
+      "value": 37.55
+    },
+    {
+      "date": "Apr 2021",
+      "value": 38.82
+    },
+    {
+      "date": "May 2021",
+      "value": 37.45
+    },
+    {
+      "date": "Jun 2021",
+      "value": 36.87
+    },
+    {
+      "date": "Jul 2021",
+      "value": 37.14
+    },
+    {
+      "date": "Aug 2021",
+      "value": 37.52
+    },
+    {
+      "date": "Sep 2021",
+      "value": 35.46
+    },
+    {
+      "date": "Oct 2021",
+      "value": 36.72
+    },
+    {
+      "date": "Nov 2021",
+      "value": 35.84
+    },
+    {
+      "date": "Dec 2021",
+      "value": 34.13
+    },
+    {
+      "date": "Jan 2022",
+      "value": 30.68
+    },
+    {
+      "date": "Feb 2022",
+      "value": 29.41
+    },
+    {
+      "date": "Mar 2022",
+      "value": 28.15
+    },
+    {
+      "date": "Apr 2022",
+      "value": 25.34
+    },
+    {
+      "date": "May 2022",
+      "value": 23.89
+    },
+    {
+      "date": "Jun 2022",
+      "value": 21.68
+    },
+    {
+      "date": "Jul 2022",
+      "value": 22.74
+    },
+    {
+      "date": "Aug 2022",
+      "value": 22.13
+    },
+    {
+      "date": "Sep 2022",
+      "value": 20.45
+    },
+    {
+      "date": "Oct 2022",
+      "value": 21.38
+    },
+    {
+      "date": "Nov 2022",
+      "value": 22.56
+    },
+    {
+      "date": "Dec 2022",
+      "value": 21.41
+    },
+    {
+      "date": "Jan 2023",
+      "value": 22.68
+    },
+    {
+      "date": "Feb 2023",
+      "value": 22.14
+    },
+    {
+      "date": "Mar 2023",
+      "value": 22.81
+    },
+    {
+      "date": "Apr 2023",
+      "value": 23.41
+    },
+    {
+      "date": "May 2023",
+      "value": 24.15
+    },
+    {
+      "date": "Jun 2023",
+      "value": 25.62
+    },
+    {
+      "date": "Jul 2023",
+      "value": 26.15
+    },
+    {
+      "date": "Aug 2023",
+      "value": 25.34
+    },
+    {
+      "date": "Sep 2023",
+      "value": 24.78
+    },
+    {
+      "date": "Oct 2023",
+      "value": 23.86
+    },
+    {
+      "date": "Nov 2023",
+      "value": 25.12
+    },
+    {
+      "date": "Dec 2023",
+      "value": 26.48
+    },
+    {
+      "date": "Jan 2024",
+      "value": 27.15
+    },
+    {
+      "date": "Feb 2024",
+      "value": 28.34
+    },
+    {
+      "date": "Mar 2024",
+      "value": 28.72
+    },
+    {
+      "date": "Apr 2024",
+      "value": 27.56
+    },
+    {
+      "date": "May 2024",
+      "value": 28.38
+    },
+    {
+      "date": "Jun 2024",
+      "value": 29.15
+    },
+    {
+      "date": "Jul 2024",
+      "value": 29.84
+    },
+    {
+      "date": "Aug 2024",
+      "value": 29.12
+    },
+    {
+      "date": "Sep 2024",
+      "value": 28.65
+    },
+    {
+      "date": "Oct 2024",
+      "value": 29.34
+    },
+    {
+      "date": "Nov 2024",
+      "value": 30.12
+    },
+    {
+      "date": "Dec 2024",
+      "value": 29.87
+    },
+    {
+      "date": "Jan 2025",
+      "value": 29.45
+    },
+    {
+      "date": "Feb 2025",
+      "value": 28.92
+    }
+  ]
+}
