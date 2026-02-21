@@ -21,9 +21,81 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  -webkit-text-size-adjust: 100%;
 }
 
 a {
   color: var(--accent);
   text-decoration: none;
+}
+
+/* Chart card */
+.chart-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.chart-card-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chart-card-value {
+  font-size: 24px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.chart-card-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.chart-card-meta {
+  font-size: 11px;
+  color: #555570;
+  text-align: right;
+}
+
+/* Brush traveller touch targets */
+.recharts-brush-traveller {
+  touch-action: none;
+}
+
+.recharts-brush-slide {
+  touch-action: none;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .chart-card {
+    padding: 16px;
+    gap: 12px;
+    border-radius: 8px;
+  }
+
+  .chart-card-title {
+    font-size: 15px;
+  }
+
+  .chart-card-value {
+    font-size: 20px;
+  }
+
+  .chart-card-desc {
+    font-size: 12px;
+  }
 }

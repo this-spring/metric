@@ -32,42 +32,25 @@ export default function ChartCard({ indicator, color }: Props) {
   });
 
   return (
-    <div
-      style={{
-        background: "#12121a",
-        border: "1px solid #1e1e2e",
-        borderRadius: 12,
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 16,
-      }}
-    >
+    <div className="chart-card">
       <div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "baseline",
-          }}
-        >
-          <h2 style={{ fontSize: 18, fontWeight: 600 }}>
-            {indicator.display_name}
-          </h2>
+        <div className="chart-card-header">
+          <h2 className="chart-card-title">{indicator.display_name}</h2>
           {latest && (
-            <span style={{ fontSize: 24, fontWeight: 700, color: color || "#6c8cff" }}>
+            <span
+              className="chart-card-value"
+              style={{ color: color || "#6c8cff" }}
+            >
               {latest.value.toFixed(2)}
             </span>
           )}
         </div>
-        <p style={{ fontSize: 13, color: "#8888a0", marginTop: 4 }}>
-          {indicator.description}
-        </p>
+        <p className="chart-card-desc">{indicator.description}</p>
       </div>
 
       <IndicatorChart data={indicator.data} color={color} />
 
-      <p style={{ fontSize: 11, color: "#555570", textAlign: "right" }}>
+      <p className="chart-card-meta">
         Updated: {timeStr} &middot; {indicator.data.length} data points
       </p>
     </div>
