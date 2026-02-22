@@ -37,6 +37,24 @@ cd site && npm run build
 3. 在 `fetcher/config.py` 的 `INDICATORS` 列表中注册
 4. （可选）在 `site/app/page.tsx` 的 `COLORS` 中添加颜色
 
+## Automated Development Pipeline
+
+本项目通过 Claude Code Action 实现 Issue 驱动自动开发：
+
+1. 用户创建 Issue（标题/正文含 `@claude`）→ Claude 自动实现并提交 PR
+2. PR 自动触发预览部署到 `sspprriinngg.cn/ai-me/preview/pr-N/`
+3. 用户审核通过后 Merge → 自动部署到 `sspprriinngg.cn/ai-me/`
+
+### GitHub Actions Workflows
+
+| Workflow | 作用 |
+|----------|------|
+| `claude.yml` | Issue/PR 中 @claude 触发自动开发 |
+| `preview.yml` | PR 预览部署 |
+| `deploy.yml` | 正式部署到服务器 |
+| `cleanup-preview.yml` | PR 关闭后清理预览 |
+| `update-data.yml` | 每小时抓取数据 |
+
 ## Conventions
 
 - 前端使用 TypeScript，暗色主题
@@ -44,3 +62,4 @@ cd site && npm run build
 - 提交信息用英文，简洁描述变更
 - basePath 在正式部署时为 `/ai-me`
 - 部署目标：`https://sspprriinngg.cn/ai-me/`
+- 部署方式：rsync over SSH 到 `/var/www/html/ai-me/`
