@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: Deploy to Production
 
 on:
   push:
-    branches: [main, "claude/**"]
+    branches: [main]
     paths:
       - "site/**"
       - "data/**"
@@ -11,17 +11,12 @@ on:
     workflows: ["Update Market Data"]
     types: [completed]
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: pages
+  group: production-deploy
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,19 +39,23 @@ jobs:
       - name: Build
         working-directory: site
         env:
-          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_BASE_PATH: /ai-me
         run: npm run build
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: Deploy via rsync
+        uses: easingthemes/ssh-deploy@v5
         with:
-          path: site/out
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          REMOTE_HOST: sspprriinngg.cn
+          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          SOURCE: site/out/
+          TARGET: /var/www/html/ai-me/
+          ARGS: "-avz --delete --exclude='preview/'"
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Cleanup old PR previews
+        uses: appleboy/ssh-action@v1
+        with:
+          host: sspprriinngg.cn
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: rm -rf /var/www/html/ai-me/preview/
