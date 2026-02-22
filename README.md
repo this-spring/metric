@@ -78,7 +78,7 @@ main 触发 Deploy to Production
 
 | Secret | 说明 |
 |--------|------|
-| `ANTHROPIC_API_KEY` | Anthropic API 密钥（用于 Claude Code Action） |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Claude Code OAuth Token（本地运行 `claude setup-token` 生成） |
 | `DEPLOY_SSH_KEY` | 服务器 SSH 私钥（用于 rsync 部署） |
 | `DEPLOY_USER` | 服务器 SSH 用户名 |
 
