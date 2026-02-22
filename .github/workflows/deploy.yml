@@ -32,6 +32,11 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
+      - name: Copy data into site public directory
+        run: |
+          mkdir -p site/public/data
+          cp data/*.json site/public/data/ 2>/dev/null || true
+
       - name: Install dependencies
         working-directory: site
         run: npm ci || npm install

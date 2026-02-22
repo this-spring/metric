@@ -22,22 +22,31 @@ interface IndicatorData {
 }
 
 function loadIndicators(): IndicatorData[] {
-  const dataDir = path.join(process.cwd(), "..", "data");
-  if (!fs.existsSync(dataDir)) return [];
+  // Try multiple paths: ../data (repo root) and public/data (copied by CI)
+  const candidates = [
+    path.join(process.cwd(), "..", "data"),
+    path.join(process.cwd(), "public", "data"),
+  ];
 
-  const files = fs.readdirSync(dataDir).filter((f) => f.endsWith(".json"));
-  const indicators: IndicatorData[] = [];
+  for (const dataDir of candidates) {
+    if (!fs.existsSync(dataDir)) continue;
 
-  for (const file of files) {
-    try {
-      const raw = fs.readFileSync(path.join(dataDir, file), "utf-8");
-      indicators.push(JSON.parse(raw));
-    } catch {
-      continue;
+    const files = fs.readdirSync(dataDir).filter((f) => f.endsWith(".json"));
+    if (files.length === 0) continue;
+
+    const indicators: IndicatorData[] = [];
+    for (const file of files) {
+      try {
+        const raw = fs.readFileSync(path.join(dataDir, file), "utf-8");
+        indicators.push(JSON.parse(raw));
+      } catch {
+        continue;
+      }
     }
+    if (indicators.length > 0) return indicators;
   }
 
-  return indicators;
+  return [];
 }
 
 export default function Home() {
