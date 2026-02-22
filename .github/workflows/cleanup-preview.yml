@@ -1,0 +1,17 @@
+name: Cleanup Preview
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove preview directory
+        uses: appleboy/ssh-action@v1
+        with:
+          host: sspprriinngg.cn
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: rm -rf /var/www/html/ai-me/preview/pr-${{ github.event.pull_request.number }}/
