@@ -59,3 +59,4 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: rm -rf /var/www/html/ai-me/preview/
+        
