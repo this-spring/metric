@@ -43,7 +43,7 @@ jobs:
         run: npm run build
 
       - name: Deploy via rsync
-        uses: easingthemes/ssh-deploy@v5
+        uses: easingthemes/ssh-deploy@v4
         with:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
           REMOTE_HOST: sspprriinngg.cn
@@ -59,4 +59,3 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: rm -rf /var/www/html/ai-me/preview/
-        
