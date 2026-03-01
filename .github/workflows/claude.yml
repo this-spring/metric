@@ -30,8 +30,19 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup SSH for server management
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq openssh-client
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: sspprriinngg.cn

@@ -55,6 +55,44 @@ cd site && npm run build
 | `cleanup-preview.yml` | PR 关闭后清理预览 |
 | `update-data.yml` | 每小时抓取数据 |
 
+## Server Management
+
+Claude 在 GitHub Actions 中运行时，拥有对生产服务器的 SSH 访问权限，可以直接管理服务器。
+
+### SSH 连接方式
+
+```bash
+ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "<command>"
+```
+
+环境变量 `DEPLOY_USER` 和 `DEPLOY_HOST` 已在 workflow 中设置。
+
+### 服务器信息
+
+- 主机：`sspprriinngg.cn`
+- 操作系统：CentOS（nginx/1.14.1）
+- Web 服务器：nginx
+- 站点根目录：`/var/www/html/`
+- Metric 站点目录：`/var/www/html/metric/`
+- Nginx 配置目录：`/etc/nginx/` （主配置 `/etc/nginx/nginx.conf`，站点配置 `/etc/nginx/conf.d/`）
+
+### 常见运维操作
+
+| 操作 | 命令 |
+|------|------|
+| 查看 nginx 配置 | `nginx -T` |
+| 测试 nginx 配置 | `nginx -t` |
+| 重载 nginx | `nginx -s reload` |
+| 查看站点文件 | `ls -la /var/www/html/metric/` |
+| 查看 nginx 错误日志 | `tail -50 /var/log/nginx/error.log` |
+| 查看 nginx 访问日志 | `tail -50 /var/log/nginx/access.log` |
+
+### 注意事项
+
+- 修改 nginx 配置前，务必先用 `nginx -t` 验证
+- 操作前先检查当前状态，避免覆盖已有配置
+- 对于破坏性操作（如删除文件、修改系统配置），应在 Issue/PR 中说明原因
+
 ## Conventions
 
 - 前端使用 TypeScript，暗色主题
