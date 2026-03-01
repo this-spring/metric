@@ -1,0 +1,38 @@
+name: Fix Nginx Config
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/fix-nginx.yml"
+  workflow_dispatch:
+
+jobs:
+  fix-nginx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Diagnose and fix
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@sspprriinngg.cn"
+
+          echo "=== Files in /var/www/html/metric/ ==="
+          $SSH_CMD "ls -la /var/www/html/metric/ | head -30" || echo "Directory not found"
+
+          echo ""
+          echo "=== Full nginx config ==="
+          $SSH_CMD "nginx -T 2>&1"
+
+          echo ""
+          echo "=== Curl test ==="
+          curl -sI https://sspprriinngg.cn/metric/ || true
+          curl -sI https://sspprriinngg.cn/ || true
