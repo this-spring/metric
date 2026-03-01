@@ -43,11 +43,13 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
     endIndex: sampled.length - 1,
   });
   const [activeRange, setActiveRange] = useState<string | null>(null);
+  const [lockedSpan, setLockedSpan] = useState<number | null>(null);
 
   function setTimeRange(years: number, label: string) {
     if (years === 0) {
       setBrushRange({ startIndex: 0, endIndex: sampled.length - 1 });
       setActiveRange(label);
+      setLockedSpan(null);
       return;
     }
     const now = new Date();
@@ -63,8 +65,10 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
         break;
       }
     }
+    const span = sampled.length - 1 - startIdx;
     setBrushRange({ startIndex: startIdx, endIndex: sampled.length - 1 });
     setActiveRange(label);
+    setLockedSpan(span);
   }
 
   // Determine visible time span to pick the right X-axis format
@@ -155,7 +159,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             stroke={color}
             strokeWidth={1.5}
             dot={false}
-            animationDuration={800}
+            isAnimationActive={false}
           />
           <Brush
             dataKey="date"
@@ -167,10 +171,31 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             endIndex={brushRange.endIndex}
             onChange={(range) => {
               if (
-                range &&
-                range.startIndex !== undefined &&
-                range.endIndex !== undefined
-              ) {
+                !range ||
+                range.startIndex === undefined ||
+                range.endIndex === undefined
+              )
+                return;
+
+              if (lockedSpan !== null && lockedSpan > 0) {
+                // Keep window size fixed when a time range is active
+                const newMid =
+                  (range.startIndex + range.endIndex) / 2;
+                let newStart = Math.round(newMid - lockedSpan / 2);
+                let newEnd = newStart + lockedSpan;
+                if (newStart < 0) {
+                  newStart = 0;
+                  newEnd = lockedSpan;
+                }
+                if (newEnd > sampled.length - 1) {
+                  newEnd = sampled.length - 1;
+                  newStart = newEnd - lockedSpan;
+                }
+                setBrushRange({
+                  startIndex: Math.max(0, newStart),
+                  endIndex: Math.min(sampled.length - 1, newEnd),
+                });
+              } else {
                 setBrushRange({
                   startIndex: range.startIndex,
                   endIndex: range.endIndex,
