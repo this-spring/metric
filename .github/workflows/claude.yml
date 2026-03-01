@@ -30,6 +30,13 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup SSH for server management
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1.0.51
@@ -41,11 +48,10 @@ jobs:
             NEVER ask for user approval or confirmation. Proceed autonomously with ALL actions including:
             - Git operations (commit, push, branch creation)
             - Creating pull requests
+            - Running builds (npm install, npm run build)
+            - Deploying to production servers via SSH
             - Any file modifications
             Complete the entire task end-to-end without stopping to ask for permission.
-
-            IMPORTANT: Do NOT build or deploy the project yourself.
-            - Do NOT run npm install, npm run build, or any build commands.
-            - Do NOT SSH into any server or run any deployment commands.
-            - Build and deploy are handled automatically by preview.yml (on PR) and deploy.yml (on merge to main).
-            - Your job is ONLY: write code, commit, push, and create a PR. That's it.
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: sspprriinngg.cn
