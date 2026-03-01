@@ -37,6 +37,20 @@ cd site && npm run build
 3. 在 `fetcher/config.py` 的 `INDICATORS` 列表中注册
 4. （可选）在 `site/app/page.tsx` 的 `COLORS` 中添加颜色
 
+## 开发流程（必须遵守）
+
+所有需求必须按以下流程执行，**不可跳过任何步骤**：
+
+1. **开发** — 在 feature 分支上完成代码修改，提交并推送
+2. **创建 PR** — 推送后立即创建 PR，触发 `preview.yml` 自动部署预览环境
+3. **等待验收** — 预览地址为 `https://sspprriinngg.cn/metric/preview/pr-N/`，告知用户预览地址，等待用户验收
+4. **合入 master** — 用户验收通过后，才可合入 main 分支，触发正式部署
+
+**关键原则：**
+- 开发完成后必须创建 PR，不能只推送不建 PR
+- 禁止未经用户验收直接合入 main
+- 预览部署由 GitHub Actions 自动完成，本地环境无 SSH 权限时不要尝试手动部署
+
 ## Automated Development Pipeline
 
 本项目通过 Claude Code Action 实现 Issue 驱动自动开发：
