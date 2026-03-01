@@ -37,7 +37,7 @@ export default function ChartCard({ indicator, color }: Props) {
         background: "#12121a",
         border: "1px solid #1e1e2e",
         borderRadius: 12,
-        padding: "24px",
+        padding: "clamp(16px, 4vw, 24px)",
         display: "flex",
         flexDirection: "column",
         gap: 16,
@@ -51,11 +51,11 @@ export default function ChartCard({ indicator, color }: Props) {
             alignItems: "baseline",
           }}
         >
-          <h2 style={{ fontSize: 18, fontWeight: 600 }}>
+          <h2 style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 600 }}>
             {indicator.display_name}
           </h2>
           {latest && (
-            <span style={{ fontSize: 24, fontWeight: 700, color: color || "#6c8cff" }}>
+            <span style={{ fontSize: "clamp(20px, 5vw, 24px)", fontWeight: 700, color: color || "#6c8cff" }}>
               {latest.value.toFixed(2)}
             </span>
           )}
