@@ -52,17 +52,37 @@ function loadIndicators(): IndicatorData[] {
 export default function Home() {
   const indicators = loadIndicators();
 
+  // Detect mobile (server-side safe)
+  const isMobile = false; // Will be handled by CSS media queries
+
   return (
     <main
       style={{
         maxWidth: 960,
         margin: "0 auto",
-        padding: "40px 20px",
+        padding: "clamp(20px, 5vw, 40px) clamp(12px, 4vw, 20px)",
       }}
     >
-      <header style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Market Indicators</h1>
-        <p style={{ fontSize: 14, color: "#8888a0", marginTop: 8 }}>
+      <header
+        style={{
+          marginBottom: "clamp(24px, 6vw, 40px)",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "clamp(20px, 5vw, 28px)",
+            fontWeight: 700,
+          }}
+        >
+          Market Indicators
+        </h1>
+        <p
+          style={{
+            fontSize: "clamp(12px, 3vw, 14px)",
+            color: "#8888a0",
+            marginTop: 8,
+          }}
+        >
           S&amp;P 500 PE, NASDAQ PE, and VIX historical trends. Updated hourly.
         </p>
       </header>
@@ -84,7 +104,7 @@ export default function Home() {
         <div
           style={{
             display: "grid",
-            gap: 24,
+            gap: "clamp(16px, 4vw, 24px)",
             gridTemplateColumns: "1fr",
           }}
         >
@@ -100,10 +120,10 @@ export default function Home() {
 
       <footer
         style={{
-          marginTop: 60,
-          paddingTop: 20,
+          marginTop: "clamp(40px, 8vw, 60px)",
+          paddingTop: "clamp(16px, 4vw, 20px)",
           borderTop: "1px solid #1e1e2e",
-          fontSize: 12,
+          fontSize: "clamp(11px, 2.5vw, 12px)",
           color: "#555570",
           textAlign: "center",
         }}
