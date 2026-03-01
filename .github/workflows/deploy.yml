@@ -39,7 +39,7 @@ jobs:
       - name: Build
         working-directory: site
         env:
-          NEXT_PUBLIC_BASE_PATH: /ai-me
+          NEXT_PUBLIC_BASE_PATH: /metric
         run: npm run build
 
       - name: Setup SSH
@@ -53,16 +53,16 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn \
-            "mkdir -p /var/www/html/ai-me/"
+            "mkdir -p /var/www/html/metric/"
 
       - name: Deploy via rsync
         run: |
           rsync -avz --delete --exclude='preview/' \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
-            site/out/ ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn:/var/www/html/ai-me/
+            site/out/ ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn:/var/www/html/metric/
 
       - name: Cleanup old PR previews
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn \
-            "rm -rf /var/www/html/ai-me/preview/"
+            "rm -rf /var/www/html/metric/preview/"
