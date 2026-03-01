@@ -36,11 +36,11 @@ export default function ChartCard({ indicator, color }: Props) {
       style={{
         background: "#12121a",
         border: "1px solid #1e1e2e",
-        borderRadius: 12,
-        padding: "24px",
+        borderRadius: "clamp(8px, 2vw, 12px)",
+        padding: "clamp(16px, 4vw, 24px)",
         display: "flex",
         flexDirection: "column",
-        gap: 16,
+        gap: "clamp(12px, 3vw, 16px)",
       }}
     >
       <div>
@@ -49,25 +49,27 @@ export default function ChartCard({ indicator, color }: Props) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "baseline",
+            flexWrap: "wrap",
+            gap: 8,
           }}
         >
-          <h2 style={{ fontSize: 18, fontWeight: 600 }}>
+          <h2 style={{ fontSize: "clamp(16px, 3.5vw, 18px)", fontWeight: 600 }}>
             {indicator.display_name}
           </h2>
           {latest && (
-            <span style={{ fontSize: 24, fontWeight: 700, color: color || "#6c8cff" }}>
+            <span style={{ fontSize: "clamp(20px, 5vw, 24px)", fontWeight: 700, color: color || "#6c8cff" }}>
               {latest.value.toFixed(2)}
             </span>
           )}
         </div>
-        <p style={{ fontSize: 13, color: "#8888a0", marginTop: 4 }}>
+        <p style={{ fontSize: "clamp(12px, 2.8vw, 13px)", color: "#8888a0", marginTop: 4 }}>
           {indicator.description}
         </p>
       </div>
 
       <IndicatorChart data={indicator.data} color={color} />
 
-      <p style={{ fontSize: 11, color: "#555570", textAlign: "right" }}>
+      <p style={{ fontSize: "clamp(10px, 2.5vw, 11px)", color: "#555570", textAlign: "right" }}>
         Updated: {timeStr} &middot; {indicator.data.length} data points
       </p>
     </div>
