@@ -49,6 +49,12 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
 
+      - name: Create target directory
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn \
+            "mkdir -p /var/www/html/ai-me/"
+
       - name: Deploy via rsync
         run: |
           rsync -avz --delete --exclude='preview/' \
