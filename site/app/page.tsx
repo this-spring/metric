@@ -57,12 +57,12 @@ export default function Home() {
       style={{
         maxWidth: 960,
         margin: "0 auto",
-        padding: "40px 20px",
+        padding: "clamp(20px, 5vw, 40px) clamp(12px, 4vw, 20px)",
       }}
     >
-      <header style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Market Indicators</h1>
-        <p style={{ fontSize: 14, color: "#8888a0", marginTop: 8 }}>
+      <header style={{ marginBottom: "clamp(24px, 5vw, 40px)" }}>
+        <h1 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 700 }}>Market Indicators</h1>
+        <p style={{ fontSize: "clamp(12px, 3vw, 14px)", color: "#8888a0", marginTop: 8 }}>
           S&amp;P 500 PE, NASDAQ PE, and VIX historical trends. Updated hourly.
         </p>
       </header>
