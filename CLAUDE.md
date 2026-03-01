@@ -51,22 +51,43 @@ cd site && npm run build
 - 禁止未经用户验收直接合入 main
 - 预览部署由 GitHub Actions 自动完成，本地环境无 SSH 权限时不要尝试手动部署
 
-## Automated Development Pipeline
+## AI-Native Two-Agent Architecture
 
-本项目通过 Claude Code Action 实现 Issue 驱动自动开发：
+本项目采用 **Developer Agent + Review Agent** 双 Agent 架构：
 
-1. 用户创建 Issue（标题/正文含 `@claude`）→ Claude 自动实现并提交 PR
-2. PR 自动触发预览部署到 `sspprriinngg.cn/metric/preview/pr-N/`
-3. 用户审核通过后 Merge → 自动部署到 `sspprriinngg.cn/metric/`
+```
+用户创建 Issue (@claude)
+  → Developer Agent (claude.yml) 自动开发，提交 PR
+    → Review Agent (review.yml) 自动审查代码 + 验证构建
+      → Preview 部署 (preview.yml) 供用户验收
+        → 用户 Approve → Merge → 正式部署 (deploy.yml)
+```
+
+### Developer Agent (`claude.yml`)
+- **角色**：开发者，负责写代码
+- **触发**：Issue/PR 中 @claude
+- **权限**：读写代码、创建 PR、执行构建、测试部署
+- **工具**：Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
+
+### Review Agent (`review.yml`)
+- **角色**：代码审查员，负责质量把关
+- **触发**：PR 创建/更新时自动运行
+- **审查内容**：
+  - 代码 diff 审查（类型安全、安全漏洞、逻辑错误、死代码）
+  - 构建验证（`npm run build` 必须通过）
+  - 结构化审查报告（Critical / Warning / Note）
+- **输出**：PR comment 形式的审查报告，给出 APPROVE 或 REQUEST CHANGES
+- **权限**：只读代码 + 写 PR comment，**不能修改代码**
 
 ### GitHub Actions Workflows
 
-| Workflow | 作用 |
-|----------|------|
-| `claude.yml` | Issue/PR 中 @claude 触发自动开发 |
-| `preview.yml` | PR 预览部署 |
-| `deploy.yml` | 正式部署到服务器 |
-| `cleanup-preview.yml` | PR 关闭后清理预览 |
+| Workflow | 角色 | 作用 |
+|----------|------|------|
+| `claude.yml` | Developer Agent | Issue/PR 中 @claude 触发自动开发 |
+| `review.yml` | Review Agent | PR 自动代码审查 + 构建验证 |
+| `preview.yml` | — | PR 预览部署 |
+| `deploy.yml` | — | 正式部署到服务器 |
+| `cleanup-preview.yml` | — | PR 关闭后清理预览 |
 | `update-data.yml` | 每小时抓取数据 |
 
 ## Server Management
