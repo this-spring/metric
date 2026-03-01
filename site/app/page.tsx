@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import ChartCard from "./components/ChartCard";
+import ClientApp from "./components/ClientApp";
 
 const COLORS: Record<string, string> = {
   sp500_pe: "#6c8cff",
@@ -22,7 +22,6 @@ interface IndicatorData {
 }
 
 function loadIndicators(): IndicatorData[] {
-  // Try multiple paths: ../data (repo root) and public/data (copied by CI)
   const candidates = [
     path.join(process.cwd(), "..", "data"),
     path.join(process.cwd(), "public", "data"),
@@ -51,65 +50,9 @@ function loadIndicators(): IndicatorData[] {
 
 export default function Home() {
   const indicators = loadIndicators();
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
   return (
-    <main
-      style={{
-        maxWidth: 960,
-        margin: "0 auto",
-        padding: "clamp(20px, 5vw, 40px) clamp(12px, 4vw, 20px)",
-      }}
-    >
-      <header style={{ marginBottom: "clamp(24px, 5vw, 40px)" }}>
-        <h1 style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 700 }}>Market Indicators</h1>
-        <p style={{ fontSize: "clamp(12px, 3vw, 14px)", color: "#8888a0", marginTop: 8 }}>
-          S&amp;P 500 PE, NASDAQ PE, and VIX historical trends. Updated hourly.
-        </p>
-      </header>
-
-      {indicators.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: 80,
-            color: "#555570",
-          }}
-        >
-          <p style={{ fontSize: 16 }}>No data available yet.</p>
-          <p style={{ fontSize: 13, marginTop: 8 }}>
-            Run the data fetcher first: <code>cd fetcher &amp;&amp; python main.py</code>
-          </p>
-        </div>
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gap: 24,
-            gridTemplateColumns: "1fr",
-          }}
-        >
-          {indicators.map((ind) => (
-            <ChartCard
-              key={ind.name}
-              indicator={ind}
-              color={COLORS[ind.name]}
-            />
-          ))}
-        </div>
-      )}
-
-      <footer
-        style={{
-          marginTop: 60,
-          paddingTop: 20,
-          borderTop: "1px solid #1e1e2e",
-          fontSize: 12,
-          color: "#555570",
-          textAlign: "center",
-        }}
-      >
-        Data sources: multpl.com, Yahoo Finance. Auto-updated via GitHub Actions.
-      </footer>
-    </main>
+    <ClientApp indicators={indicators} colors={COLORS} basePath={basePath} />
   );
 }

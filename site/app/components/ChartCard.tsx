@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useI18n } from "../i18n";
 
 const IndicatorChart = dynamic(() => import("./IndicatorChart"), {
   ssr: false,
@@ -15,7 +16,7 @@ const IndicatorChart = dynamic(() => import("./IndicatorChart"), {
         fontSize: 13,
       }}
     >
-      Loading chart...
+      Loading...
     </div>
   ),
 });
@@ -39,15 +40,21 @@ interface Props {
 }
 
 export default function ChartCard({ indicator, color }: Props) {
+  const { locale, t } = useI18n();
   const latest = indicator.data[indicator.data.length - 1];
   const updatedAt = new Date(indicator.updated_at);
-  const timeStr = updatedAt.toLocaleString("en-US", {
+  const timeStr = updatedAt.toLocaleString(locale === "zh" ? "zh-CN" : "en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  const indicatorKey = indicator.name as keyof typeof t.indicators;
+  const localizedIndicator = t.indicators[indicatorKey];
+  const displayName = localizedIndicator?.display_name || indicator.display_name;
+  const description = localizedIndicator?.description || indicator.description;
 
   return (
     <div
@@ -72,7 +79,7 @@ export default function ChartCard({ indicator, color }: Props) {
           }}
         >
           <h2 style={{ fontSize: "clamp(15px, 4vw, 18px)", fontWeight: 600 }}>
-            {indicator.display_name}
+            {displayName}
           </h2>
           {latest && (
             <span
@@ -87,14 +94,14 @@ export default function ChartCard({ indicator, color }: Props) {
           )}
         </div>
         <p style={{ fontSize: "clamp(12px, 3vw, 13px)", color: "#8888a0", marginTop: 4 }}>
-          {indicator.description}
+          {description}
         </p>
       </div>
 
-      <IndicatorChart data={indicator.data} color={color} />
+      <IndicatorChart data={indicator.data} color={color} locale={locale} />
 
       <p style={{ fontSize: 11, color: "#555570", textAlign: "right" }}>
-        Updated: {timeStr} &middot; {indicator.data.length} data points
+        {t.updated}: {timeStr} &middot; {indicator.data.length} {t.dataPoints}
       </p>
     </div>
   );

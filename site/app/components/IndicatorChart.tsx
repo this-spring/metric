@@ -25,6 +25,7 @@ interface ChartPoint {
 interface Props {
   data: DataPoint[];
   color?: string;
+  locale?: string;
 }
 
 const TIME_RANGES = [
@@ -38,7 +39,8 @@ function toTs(dateStr: string) {
   return new Date(dateStr).getTime();
 }
 
-export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
+export default function IndicatorChart({ data, color = "#6c8cff", locale = "zh" }: Props) {
+  const dateLocale = locale === "zh" ? "zh-CN" : "en-US";
   const [activeRange, setActiveRange] = useState("All");
 
   // Slice data by selected time range
@@ -112,6 +114,9 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
   function formatXTick(ts: number) {
     const d = new Date(ts);
     if (spanYears <= 2) {
+      if (locale === "zh") {
+        return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}`;
+      }
       const mon = d.toLocaleDateString("en-US", { month: "short" });
       const yr = String(d.getFullYear()).slice(2);
       return `${mon} '${yr}`;
@@ -121,7 +126,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
 
   function formatTooltipLabel(ts: number) {
     const d = new Date(ts);
-    return d.toLocaleDateString("en-US", {
+    return d.toLocaleDateString(dateLocale, {
       year: "numeric",
       month: "short",
       day: "numeric",
