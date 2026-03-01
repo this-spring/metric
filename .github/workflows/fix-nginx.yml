@@ -23,29 +23,44 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Diagnose and post results
+      - name: Add /metric location to nginx config
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@sspprriinngg.cn"
+
+          # Add metric location block to ai-me.conf (the active HTTPS server block)
+          $SSH_CMD 'sed -i "/location = \/trade-hold {/i\\
+          \\n    location = /metric { return 301 /metric/; }\\n\\n    location ^~ /metric/ {\\n        alias /var/www/html/metric/;\\n        try_files \\\$uri \\\$uri/ /metric/index.html;\\n    }\\n" /etc/nginx/conf.d/ai-me.conf'
+
+          echo "=== Updated ai-me.conf ==="
+          $SSH_CMD "cat /etc/nginx/conf.d/ai-me.conf"
+
+      - name: Test and reload nginx
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@sspprriinngg.cn"
+
+          echo "=== Testing nginx config ==="
+          $SSH_CMD "nginx -t"
+
+          echo "=== Reloading nginx ==="
+          $SSH_CMD "nginx -s reload"
+
+      - name: Verify and report
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@sspprriinngg.cn"
-          RESULT=""
+          sleep 3
+          STATUS=$(curl -sI https://sspprriinngg.cn/metric/ 2>&1 | head -1)
+          echo "Response: $STATUS"
 
-          RESULT+="### Files in /var/www/html/metric/\n\`\`\`\n"
-          RESULT+=$($SSH_CMD "ls -la /var/www/html/metric/ | head -30" 2>&1 || echo "Directory not found")
-          RESULT+="\n\`\`\`\n\n"
+          gh issue comment 12 --body "## Nginx Fix Applied
 
-          RESULT+="### Nginx config\n\`\`\`nginx\n"
-          RESULT+=$($SSH_CMD "nginx -T 2>&1")
-          RESULT+="\n\`\`\`\n\n"
+          Added \`/metric\` location block to nginx config.
 
-          RESULT+="### Curl test\n\`\`\`\n"
-          RESULT+=$(curl -sI https://sspprriinngg.cn/metric/ 2>&1 || true)
-          RESULT+="\n\n"
-          RESULT+=$(curl -sI https://sspprriinngg.cn/ 2>&1 || true)
-          RESULT+="\n\`\`\`\n"
+          **Result:** \`$STATUS\`
 
-          # Post as comment on issue #12
-          gh issue comment 12 --body "## Server Diagnostic Results
-
-          $(echo -e "$RESULT")"
+          Site should now be accessible at https://sspprriinngg.cn/metric/"
