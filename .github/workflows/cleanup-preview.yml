@@ -14,4 +14,4 @@ jobs:
           host: sspprriinngg.cn
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: rm -rf /var/www/html/ai-me/preview/pr-${{ github.event.pull_request.number }}/
+          script: rm -rf /var/www/html/metric/preview/pr-${{ github.event.pull_request.number }}/
