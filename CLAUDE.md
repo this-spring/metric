@@ -50,48 +50,26 @@ cd site && npm run build
 | Workflow | 作用 |
 |----------|------|
 | `claude.yml` | Issue/PR 中 @claude 触发自动开发 |
-| `preview.yml` | PR 预览部署 |
-| `deploy.yml` | 正式部署到服务器 |
+| `preview.yml` | PR 预览部署（自动触发，Claude 不需要干预） |
+| `deploy.yml` | 正式部署到服务器（合并到 main 后自动触发，Claude 不需要干预） |
 | `cleanup-preview.yml` | PR 关闭后清理预览 |
 | `update-data.yml` | 每小时抓取数据 |
 
-## Server Management
+### Claude 的职责边界
 
-Claude 在 GitHub Actions 中运行时，拥有对生产服务器的 SSH 访问权限，可以直接管理服务器。
+**Claude 只负责：**
+- 阅读和理解代码
+- 编写/修改代码
+- 提交代码（git commit + push）
+- 创建 Pull Request
 
-### SSH 连接方式
+**Claude 不要做（由 workflow 自动完成）：**
+- 不要运行 `npm install` / `npm run build` 构建项目
+- 不要 SSH 到服务器
+- 不要执行部署操作
+- 不要提供预览链接（preview.yml 会自动评论）
 
-```bash
-ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "<command>"
-```
-
-环境变量 `DEPLOY_USER` 和 `DEPLOY_HOST` 已在 workflow 中设置。
-
-### 服务器信息
-
-- 主机：`sspprriinngg.cn`
-- 操作系统：CentOS（nginx/1.14.1）
-- Web 服务器：nginx
-- 站点根目录：`/var/www/html/`
-- Metric 站点目录：`/var/www/html/metric/`
-- Nginx 配置目录：`/etc/nginx/` （主配置 `/etc/nginx/nginx.conf`，站点配置 `/etc/nginx/conf.d/`）
-
-### 常见运维操作
-
-| 操作 | 命令 |
-|------|------|
-| 查看 nginx 配置 | `nginx -T` |
-| 测试 nginx 配置 | `nginx -t` |
-| 重载 nginx | `nginx -s reload` |
-| 查看站点文件 | `ls -la /var/www/html/metric/` |
-| 查看 nginx 错误日志 | `tail -50 /var/log/nginx/error.log` |
-| 查看 nginx 访问日志 | `tail -50 /var/log/nginx/access.log` |
-
-### 注意事项
-
-- 修改 nginx 配置前，务必先用 `nginx -t` 验证
-- 操作前先检查当前状态，避免覆盖已有配置
-- 对于破坏性操作（如删除文件、修改系统配置），应在 Issue/PR 中说明原因
+构建和部署完全由 `preview.yml` 和 `deploy.yml` 自动处理，Claude 提交 PR 后等待即可。
 
 ## Conventions
 
