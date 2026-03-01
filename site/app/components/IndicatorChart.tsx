@@ -67,6 +67,24 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
     setActiveRange(label);
   }
 
+  // Determine visible time span to pick the right X-axis format
+  const visibleStart = sampled[brushRange.startIndex]?.date;
+  const visibleEnd = sampled[brushRange.endIndex]?.date;
+  const spanYears =
+    visibleStart && visibleEnd
+      ? (new Date(visibleEnd).getTime() - new Date(visibleStart).getTime()) /
+        (365.25 * 24 * 3600 * 1000)
+      : 99;
+
+  function formatXTick(v: string) {
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return v;
+    if (spanYears <= 2) {
+      return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+    }
+    return d.getFullYear().toString();
+  }
+
   return (
     <div>
       <div
@@ -104,10 +122,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
           <XAxis
             dataKey="date"
             tick={{ fill: "#8888a0", fontSize: 11 }}
-            tickFormatter={(v: string) => {
-              const d = new Date(v);
-              return isNaN(d.getTime()) ? v : d.getFullYear().toString();
-            }}
+            tickFormatter={formatXTick}
             minTickGap={60}
           />
           <YAxis tick={{ fill: "#8888a0", fontSize: 11 }} width={50} />
