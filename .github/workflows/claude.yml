@@ -30,6 +30,13 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
       - name: Setup SSH for server management
         run: |
           mkdir -p ~/.ssh
@@ -49,9 +56,24 @@ jobs:
             - Git operations (commit, push, branch creation)
             - Creating pull requests
             - Running builds (npm install, npm run build)
-            - Deploying to production servers via SSH
+            - Deploying to servers via SSH
             - Any file modifications
             Complete the entire task end-to-end without stopping to ask for permission.
+
+            IMPORTANT - Verification before reporting:
+            - After building, verify that `site/out/` directory exists and contains index.html.
+            - After deploying via rsync, use `curl -s -o /dev/null -w "%{http_code}" <URL>` to verify the URL returns 200.
+            - NEVER mark a task as complete if the command failed or returned an error.
+            - If any step fails, report the ACTUAL error in your response instead of marking it as done.
+
+            Test deployment workflow:
+            1. Build: cd site && npm ci && NEXT_PUBLIC_BASE_PATH=/metric/test npm run build
+            2. Deploy: rsync site/out/ to /var/www/html/metric/test/ on the server
+            3. Verify: curl the test URL and confirm it returns 200
+            4. Report the test URL to the user: https://sspprriinngg.cn/metric/test/
+
+            Production deployment should NOT be done by Claude. Only test deployments.
+            Production is handled by deploy.yml after PR merge.
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: sspprriinngg.cn
