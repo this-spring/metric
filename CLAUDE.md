@@ -93,6 +93,39 @@ ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOS
 - 操作前先检查当前状态，避免覆盖已有配置
 - 对于破坏性操作（如删除文件、修改系统配置），应在 Issue/PR 中说明原因
 
+## 测试部署流程
+
+当需要部署到测试目录让用户预览时，按以下步骤执行：
+
+```bash
+# 1. 准备数据
+mkdir -p site/public/data && cp data/*.json site/public/data/
+
+# 2. 构建（使用测试 basePath）
+cd site && npm ci && NEXT_PUBLIC_BASE_PATH=/metric/test npm run build
+
+# 3. 验证构建产物存在
+ls site/out/index.html
+
+# 4. 部署到测试目录
+ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p /var/www/html/metric/test/"
+rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" site/out/ ${DEPLOY_USER}@${DEPLOY_HOST}:/var/www/html/metric/test/
+
+# 5. 验证部署成功（必须返回 200）
+curl -s -o /dev/null -w "%{http_code}" https://sspprriinngg.cn/metric/test/
+```
+
+**重要：每一步都必须检查返回值，任何一步失败都要如实报告错误，不能标记为完成。**
+
+测试地址：`https://sspprriinngg.cn/metric/test/`
+
+## 验证规则（必须遵守）
+
+- 构建后必须确认 `site/out/index.html` 存在
+- 部署后必须用 `curl` 验证 URL 返回 HTTP 200
+- 如果任何命令失败或返回错误码，**禁止**在任务清单中标记为 ✅
+- 如实报告错误信息，让用户知道哪一步出了问题
+
 ## Conventions
 
 - 前端使用 TypeScript，暗色主题
