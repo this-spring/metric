@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,7 +9,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Brush,
 } from "recharts";
 
 interface DataPoint {
@@ -30,77 +29,62 @@ const TIME_RANGES = [
 ];
 
 export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
-  // Downsample full dataset once for Brush overview + chart
+  const [activeRange, setActiveRange] = useState("All");
+
+  // Slice data by selected time range
+  const visibleData = useMemo(() => {
+    const range = TIME_RANGES.find((r) => r.label === activeRange);
+    if (!range || range.years === 0) return data;
+    const now = new Date();
+    const cutoff = new Date(
+      now.getFullYear() - range.years,
+      now.getMonth(),
+      now.getDate()
+    );
+    return data.filter((d) => new Date(d.date) >= cutoff);
+  }, [data, activeRange]);
+
+  // Downsample for rendering performance
   const sampled = useMemo(() => {
-    if (data.length <= 300) return data;
-    const step = Math.ceil(data.length / 300);
-    const result = data.filter((_, i) => i % step === 0);
-    const last = data[data.length - 1];
+    if (visibleData.length <= 300) return visibleData;
+    const step = Math.ceil(visibleData.length / 300);
+    const result = visibleData.filter((_, i) => i % step === 0);
+    const last = visibleData[visibleData.length - 1];
     if (result[result.length - 1] !== last) result.push(last);
     return result;
-  }, [data]);
+  }, [visibleData]);
 
-  // Compute start index for each time range
-  const rangeStartIndex = useCallback(
-    (years: number) => {
-      if (years === 0) return 0;
-      const now = new Date();
-      const cutoff = new Date(
-        now.getFullYear() - years,
-        now.getMonth(),
-        now.getDate()
-      );
-      for (let i = 0; i < sampled.length; i++) {
-        if (new Date(sampled[i].date) >= cutoff) return i;
-      }
-      return 0;
-    },
-    [sampled]
-  );
-
-  const [activeRange, setActiveRange] = useState("All");
-  const [brushStart, setBrushStart] = useState(0);
-  const [brushEnd, setBrushEnd] = useState(sampled.length - 1);
-
-  function handleRangeClick(label: string, years: number) {
-    const start = rangeStartIndex(years);
-    setActiveRange(label);
-    setBrushStart(start);
-    setBrushEnd(sampled.length - 1);
-  }
-
-  // Compute visible time span for tick formatting
+  // Visible time span in years
   const spanYears = useMemo(() => {
     if (sampled.length < 2) return 1;
-    const s = sampled[brushStart]?.date;
-    const e = sampled[brushEnd]?.date;
-    if (!s || !e) return 1;
-    return (
-      (new Date(e).getTime() - new Date(s).getTime()) /
-      (365.25 * 24 * 3600 * 1000)
-    );
-  }, [sampled, brushStart, brushEnd]);
+    const start = new Date(sampled[0].date).getTime();
+    const end = new Date(sampled[sampled.length - 1].date).getTime();
+    return (end - start) / (365.25 * 24 * 3600 * 1000);
+  }, [sampled]);
 
+  // Different tick formats per time range
   function formatXTick(v: string) {
     const d = new Date(v);
     if (isNaN(d.getTime())) return v;
+    if (spanYears <= 1) {
+      // 1Y: "Mar 2025" monthly
+      return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    }
     if (spanYears <= 2) {
-      return d.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-      });
+      // 2Y: "Q1 2025" quarterly feel, use "Mar 2025"
+      return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
     }
     if (spanYears <= 5) {
-      return d.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-      });
+      // 5Y: "2023" yearly
+      return d.getFullYear().toString();
     }
+    // All: "2000" yearly, sparser
     return d.getFullYear().toString();
   }
 
+  // Tick density adapts to range
   const minGap =
-    spanYears <= 1 ? 30 : spanYears <= 2 ? 40 : spanYears <= 5 ? 50 : 80;
+    spanYears <= 1 ? 40 : spanYears <= 2 ? 60 : spanYears <= 5 ? 50 : 80;
 
   return (
     <div>
@@ -112,10 +96,10 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
           flexWrap: "wrap",
         }}
       >
-        {TIME_RANGES.map(({ label, years }) => (
+        {TIME_RANGES.map(({ label }) => (
           <button
             key={label}
-            onClick={() => handleRangeClick(label, years)}
+            onClick={() => setActiveRange(label)}
             style={{
               padding: "3px 12px",
               borderRadius: 6,
@@ -133,7 +117,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
         ))}
       </div>
 
-      <ResponsiveContainer width="100%" height={340}>
+      <ResponsiveContainer width="100%" height={300}>
         <LineChart data={sampled}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
           <XAxis
@@ -157,6 +141,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
                 : d.toLocaleDateString("en-US", {
                     year: "numeric",
                     month: "short",
+                    day: "numeric",
                   });
             }}
           />
@@ -167,30 +152,6 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             strokeWidth={1.5}
             dot={false}
             isAnimationActive={false}
-          />
-          <Brush
-            dataKey="date"
-            height={28}
-            stroke="#2a2a3e"
-            fill="#0d0d1a"
-            travellerWidth={8}
-            startIndex={brushStart}
-            endIndex={brushEnd}
-            onChange={(range) => {
-              if (
-                !range ||
-                range.startIndex === undefined ||
-                range.endIndex === undefined
-              )
-                return;
-              setBrushStart(range.startIndex);
-              setBrushEnd(range.endIndex);
-              setActiveRange("");
-            }}
-            tickFormatter={(v: string) => {
-              const d = new Date(v);
-              return isNaN(d.getTime()) ? "" : d.getFullYear().toString();
-            }}
           />
         </LineChart>
       </ResponsiveContainer>
