@@ -16,6 +16,12 @@ interface DataPoint {
   value: number;
 }
 
+interface ChartPoint {
+  ts: number;
+  value: number;
+  date: string;
+}
+
 interface Props {
   data: DataPoint[];
   color?: string;
@@ -27,6 +33,10 @@ const TIME_RANGES = [
   { label: "5Y", years: 5 },
   { label: "All", years: 0 },
 ];
+
+function toTs(dateStr: string) {
+  return new Date(dateStr).getTime();
+}
 
 export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
   const [activeRange, setActiveRange] = useState("All");
@@ -44,72 +54,78 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
     return data.filter((d) => new Date(d.date) >= cutoff);
   }, [data, activeRange]);
 
-  // Downsample for rendering performance
-  const sampled = useMemo(() => {
-    if (visibleData.length <= 300) return visibleData;
-    const step = Math.ceil(visibleData.length / 300);
-    const result = visibleData.filter((_, i) => i % step === 0);
-    const last = visibleData[visibleData.length - 1];
-    if (result[result.length - 1] !== last) result.push(last);
-    return result;
+  // Downsample + convert to numeric timestamps for XAxis type="number"
+  const sampled: ChartPoint[] = useMemo(() => {
+    const src = visibleData.length <= 300 ? visibleData : (() => {
+      const step = Math.ceil(visibleData.length / 300);
+      const r = visibleData.filter((_, i) => i % step === 0);
+      const last = visibleData[visibleData.length - 1];
+      if (r[r.length - 1] !== last) r.push(last);
+      return r;
+    })();
+    return src.map((d) => ({ ts: toTs(d.date), value: d.value, date: d.date }));
   }, [visibleData]);
 
   // Visible time span in years
   const spanYears = useMemo(() => {
     if (sampled.length < 2) return 1;
-    const start = new Date(sampled[0].date).getTime();
-    const end = new Date(sampled[sampled.length - 1].date).getTime();
-    return (end - start) / (365.25 * 24 * 3600 * 1000);
+    return (sampled[sampled.length - 1].ts - sampled[0].ts) / (365.25 * 24 * 3600 * 1000);
   }, [sampled]);
 
-  // Generate explicit tick values based on time range
+  // Generate explicit tick timestamps
   const xTicks = useMemo(() => {
-    if (sampled.length < 2) return undefined;
-    const startDate = new Date(sampled[0].date);
-    const endDate = new Date(sampled[sampled.length - 1].date);
-    const ticks: string[] = [];
+    if (sampled.length < 2) return [];
+    const startDate = new Date(sampled[0].ts);
+    const endDate = new Date(sampled[sampled.length - 1].ts);
+    const ticks: number[] = [];
 
     if (spanYears <= 2) {
-      // 1Y → 12 ticks, 2Y → 24 ticks: one per month
+      // 1Y → ~12, 2Y → ~24: one per month
       const d = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
       while (d <= endDate) {
-        ticks.push(d.toISOString().slice(0, 10));
+        ticks.push(d.getTime());
         d.setMonth(d.getMonth() + 1);
       }
     } else if (spanYears <= 5) {
-      // 5Y: one tick per half-year (roughly 10 ticks)
+      // 5Y: every 6 months
       const d = new Date(startDate.getFullYear() + 1, 0, 1);
       while (d <= endDate) {
-        ticks.push(d.toISOString().slice(0, 10));
+        ticks.push(d.getTime());
         d.setMonth(d.getMonth() + 6);
       }
-    } else if (spanYears <= 30) {
-      // All (moderate): one tick per 5 years
+    } else if (spanYears <= 40) {
+      // All (moderate): every 5 years
       const startY = Math.ceil(startDate.getFullYear() / 5) * 5;
       for (let y = startY; y <= endDate.getFullYear(); y += 5) {
-        ticks.push(`${y}-01-01`);
+        ticks.push(new Date(y, 0, 1).getTime());
       }
     } else {
-      // All (long history like S&P 500): one tick per 10 years
+      // All (long history): every 10 years
       const startY = Math.ceil(startDate.getFullYear() / 10) * 10;
       for (let y = startY; y <= endDate.getFullYear(); y += 10) {
-        ticks.push(`${y}-01-01`);
+        ticks.push(new Date(y, 0, 1).getTime());
       }
     }
     return ticks;
   }, [sampled, spanYears]);
 
-  function formatXTick(v: string) {
-    const d = new Date(v);
-    if (isNaN(d.getTime())) return v;
+  function formatXTick(ts: number) {
+    const d = new Date(ts);
     if (spanYears <= 2) {
-      // 1Y/2Y: "Mar 25" compact month + short year
       const mon = d.toLocaleDateString("en-US", { month: "short" });
       const yr = String(d.getFullYear()).slice(2);
-      return `${mon} ${yr}`;
+      return `${mon} '${yr}`;
     }
-    // 5Y/All: year only
     return d.getFullYear().toString();
+  }
+
+  function formatTooltipLabel(ts: number) {
+    const d = new Date(ts);
+    return d.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   }
 
   return (
@@ -147,7 +163,10 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
         <LineChart data={sampled}>
           <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2e" />
           <XAxis
-            dataKey="date"
+            dataKey="ts"
+            type="number"
+            domain={["dataMin", "dataMax"]}
+            scale="time"
             tick={{ fill: "#8888a0", fontSize: 11 }}
             tickFormatter={formatXTick}
             ticks={xTicks}
@@ -160,16 +179,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
               borderRadius: 8,
               color: "#e0e0e6",
             }}
-            labelFormatter={(label: string) => {
-              const d = new Date(label);
-              return isNaN(d.getTime())
-                ? label
-                : d.toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  });
-            }}
+            labelFormatter={formatTooltipLabel}
           />
           <Line
             type="monotone"
