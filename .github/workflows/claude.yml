@@ -43,6 +43,15 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed-tools: "Bash(*),Read,Write,Edit,Glob,Grep,WebFetch,WebSearch,TodoWrite,NotebookEdit"
+          custom_instructions: |
+            You are running in a fully autonomous CI/CD environment.
+            NEVER ask for user approval or confirmation. Proceed autonomously with ALL actions including:
+            - Git operations (commit, push, branch creation)
+            - Creating pull requests
+            - Running builds (npm install, npm run build)
+            - Deploying to production servers via SSH
+            - Any file modifications
+            Complete the entire task end-to-end without stopping to ask for permission.
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_HOST: sspprriinngg.cn
