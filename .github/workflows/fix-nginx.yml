@@ -11,7 +11,11 @@ on:
 jobs:
   fix-nginx:
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
+      - uses: actions/checkout@v4
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -19,20 +23,29 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Diagnose and fix
+      - name: Diagnose and post results
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${DEPLOY_USER}@sspprriinngg.cn"
+          RESULT=""
 
-          echo "=== Files in /var/www/html/metric/ ==="
-          $SSH_CMD "ls -la /var/www/html/metric/ | head -30" || echo "Directory not found"
+          RESULT+="### Files in /var/www/html/metric/\n\`\`\`\n"
+          RESULT+=$($SSH_CMD "ls -la /var/www/html/metric/ | head -30" 2>&1 || echo "Directory not found")
+          RESULT+="\n\`\`\`\n\n"
 
-          echo ""
-          echo "=== Full nginx config ==="
-          $SSH_CMD "nginx -T 2>&1"
+          RESULT+="### Nginx config\n\`\`\`nginx\n"
+          RESULT+=$($SSH_CMD "nginx -T 2>&1")
+          RESULT+="\n\`\`\`\n\n"
 
-          echo ""
-          echo "=== Curl test ==="
-          curl -sI https://sspprriinngg.cn/metric/ || true
-          curl -sI https://sspprriinngg.cn/ || true
+          RESULT+="### Curl test\n\`\`\`\n"
+          RESULT+=$(curl -sI https://sspprriinngg.cn/metric/ 2>&1 || true)
+          RESULT+="\n\n"
+          RESULT+=$(curl -sI https://sspprriinngg.cn/ 2>&1 || true)
+          RESULT+="\n\`\`\`\n"
+
+          # Post as comment on issue #12
+          gh issue comment 12 --body "## Server Diagnostic Results
+
+          $(echo -e "$RESULT")"
