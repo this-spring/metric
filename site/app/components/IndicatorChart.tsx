@@ -9,6 +9,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { Language } from "../i18n/translations";
 
 interface DataPoint {
   date: string;
@@ -18,14 +19,17 @@ interface DataPoint {
 interface Props {
   data: DataPoint[];
   color?: string;
+  lang?: Language;
 }
 
-export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
+export default function IndicatorChart({ data, color = "#6c8cff", lang = "zh" }: Props) {
   // Downsample if too many points for performance
   const sampled =
     data.length > 500
       ? data.filter((_, i) => i % Math.ceil(data.length / 500) === 0)
       : data;
+
+  const dateLocale = lang === "zh" ? "zh-CN" : "en-US";
 
   return (
     <ResponsiveContainer width="100%" height={300}>
@@ -52,7 +56,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             const d = new Date(label);
             return isNaN(d.getTime())
               ? label
-              : d.toLocaleDateString("en-US", {
+              : d.toLocaleDateString(dateLocale, {
                   year: "numeric",
                   month: "short",
                 });

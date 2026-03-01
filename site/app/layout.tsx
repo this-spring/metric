@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Market Indicators",
+  title: "市场指标 | Market Indicators",
   description: "S&P 500 PE, NASDAQ PE, VIX historical trends updated hourly",
+  icons: {
+    icon: [{ url: "/logo.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({
@@ -12,8 +16,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="zh">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

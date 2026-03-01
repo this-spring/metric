@@ -1,6 +1,9 @@
 import fs from "fs";
 import path from "path";
 import ChartCard from "./components/ChartCard";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import EmptyState from "./components/EmptyState";
 
 const COLORS: Record<string, string> = {
   sp500_pe: "#6c8cff",
@@ -60,26 +63,10 @@ export default function Home() {
         padding: "40px 20px",
       }}
     >
-      <header style={{ marginBottom: 40 }}>
-        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Market Indicators</h1>
-        <p style={{ fontSize: 14, color: "#8888a0", marginTop: 8 }}>
-          S&amp;P 500 PE, NASDAQ PE, and VIX historical trends. Updated hourly.
-        </p>
-      </header>
+      <Header />
 
       {indicators.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: 80,
-            color: "#555570",
-          }}
-        >
-          <p style={{ fontSize: 16 }}>No data available yet.</p>
-          <p style={{ fontSize: 13, marginTop: 8 }}>
-            Run the data fetcher first: <code>cd fetcher &amp;&amp; python main.py</code>
-          </p>
-        </div>
+        <EmptyState />
       ) : (
         <div
           style={{
@@ -98,18 +85,7 @@ export default function Home() {
         </div>
       )}
 
-      <footer
-        style={{
-          marginTop: 60,
-          paddingTop: 20,
-          borderTop: "1px solid #1e1e2e",
-          fontSize: 12,
-          color: "#555570",
-          textAlign: "center",
-        }}
-      >
-        Data sources: multpl.com, Yahoo Finance. Auto-updated via GitHub Actions.
-      </footer>
+      <Footer />
     </main>
   );
 }

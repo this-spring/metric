@@ -1,6 +1,7 @@
 "use client";
 
 import IndicatorChart from "./IndicatorChart";
+import { useLanguage } from "../i18n/LanguageContext";
 
 interface DataPoint {
   date: string;
@@ -21,9 +22,10 @@ interface Props {
 }
 
 export default function ChartCard({ indicator, color }: Props) {
+  const { t, lang } = useLanguage();
   const latest = indicator.data[indicator.data.length - 1];
   const updatedAt = new Date(indicator.updated_at);
-  const timeStr = updatedAt.toLocaleString("en-US", {
+  const timeStr = updatedAt.toLocaleString(t.dateLocale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -65,10 +67,10 @@ export default function ChartCard({ indicator, color }: Props) {
         </p>
       </div>
 
-      <IndicatorChart data={indicator.data} color={color} />
+      <IndicatorChart data={indicator.data} color={color} lang={lang} />
 
       <p style={{ fontSize: 11, color: "#555570", textAlign: "right" }}>
-        Updated: {timeStr} &middot; {indicator.data.length} data points
+        {t.updated}: {timeStr} &middot; {indicator.data.length} {t.dataPoints}
       </p>
     </div>
   );
