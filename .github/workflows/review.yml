@@ -1,0 +1,87 @@
+name: AI Review Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Run Review Agent
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          direct_prompt: |
+            You are the **Review Agent** in a two-agent AI-native development system.
+            The **Developer Agent** has made changes in this PR. Your job is to review them.
+
+            ## Review Steps (execute ALL of them)
+
+            ### 1. Understand the PR context
+            - Read the PR title and description
+            - Run `git log --oneline origin/main..HEAD` to see all commits
+            - Run `git diff origin/main...HEAD --stat` for a file change summary
+
+            ### 2. Code review
+            - Run `git diff origin/main...HEAD` to read the full diff
+            - Check for:
+              - TypeScript type errors or missing types
+              - Security issues (XSS, injection, exposed secrets)
+              - Logic bugs or off-by-one errors
+              - Dead code or unused imports
+              - Breaking changes to existing functionality
+              - Code style consistency with the project
+
+            ### 3. Build verification
+            - Run: `mkdir -p site/public/data && cp data/*.json site/public/data/`
+            - Run: `cd site && npm ci && npm run build`
+            - Verify `site/out/index.html` exists
+            - If build fails, this is a blocking issue
+
+            ### 4. Write review summary
+            Post a structured review as a PR comment using this format:
+
+            ```
+            ## 🤖 AI Review Agent Report
+
+            ### Build Status
+            ✅ / ❌ Build result
+
+            ### Code Review
+            List findings by severity:
+            - 🔴 **Critical**: Must fix before merge
+            - 🟡 **Warning**: Should fix, not blocking
+            - 🟢 **Note**: Suggestions for improvement
+
+            ### Summary
+            One sentence overall assessment.
+
+            ### Verdict
+            ✅ APPROVE / ❌ REQUEST CHANGES
+            ```
+
+            ## Rules
+            - Be concise and specific - reference file:line for each finding
+            - Build failure = automatic REQUEST CHANGES
+            - No critical issues + build passes = APPROVE
+            - Do NOT make any code changes. Review only.
+            - Do NOT create commits or push anything.
+          claude_args: >-
+            --allowedTools "Bash(*),Read,Glob,Grep,TodoWrite"
