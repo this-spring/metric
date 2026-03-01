@@ -82,8 +82,14 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
     if (spanYears <= 2) {
       return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
     }
+    if (spanYears <= 5) {
+      return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
+    }
     return d.getFullYear().toString();
   }
+
+  // Shorter time ranges → smaller tick gap → more labels
+  const minGap = spanYears <= 1 ? 30 : spanYears <= 2 ? 40 : spanYears <= 5 ? 50 : 60;
 
   return (
     <div>
@@ -123,7 +129,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             dataKey="date"
             tick={{ fill: "#8888a0", fontSize: 11 }}
             tickFormatter={formatXTick}
-            minTickGap={60}
+            minTickGap={minGap}
           />
           <YAxis tick={{ fill: "#8888a0", fontSize: 11 }} width={50} />
           <Tooltip
