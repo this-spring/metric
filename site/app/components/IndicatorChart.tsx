@@ -62,29 +62,55 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
     return (end - start) / (365.25 * 24 * 3600 * 1000);
   }, [sampled]);
 
-  // Different tick formats per time range
+  // Generate explicit tick values based on time range
+  const xTicks = useMemo(() => {
+    if (sampled.length < 2) return undefined;
+    const startDate = new Date(sampled[0].date);
+    const endDate = new Date(sampled[sampled.length - 1].date);
+    const ticks: string[] = [];
+
+    if (spanYears <= 2) {
+      // 1Y → 12 ticks, 2Y → 24 ticks: one per month
+      const d = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
+      while (d <= endDate) {
+        ticks.push(d.toISOString().slice(0, 10));
+        d.setMonth(d.getMonth() + 1);
+      }
+    } else if (spanYears <= 5) {
+      // 5Y: one tick per half-year (roughly 10 ticks)
+      const d = new Date(startDate.getFullYear() + 1, 0, 1);
+      while (d <= endDate) {
+        ticks.push(d.toISOString().slice(0, 10));
+        d.setMonth(d.getMonth() + 6);
+      }
+    } else if (spanYears <= 30) {
+      // All (moderate): one tick per 5 years
+      const startY = Math.ceil(startDate.getFullYear() / 5) * 5;
+      for (let y = startY; y <= endDate.getFullYear(); y += 5) {
+        ticks.push(`${y}-01-01`);
+      }
+    } else {
+      // All (long history like S&P 500): one tick per 10 years
+      const startY = Math.ceil(startDate.getFullYear() / 10) * 10;
+      for (let y = startY; y <= endDate.getFullYear(); y += 10) {
+        ticks.push(`${y}-01-01`);
+      }
+    }
+    return ticks;
+  }, [sampled, spanYears]);
+
   function formatXTick(v: string) {
     const d = new Date(v);
     if (isNaN(d.getTime())) return v;
-    if (spanYears <= 1) {
-      // 1Y: "Mar 2025" monthly
-      return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-    }
     if (spanYears <= 2) {
-      // 2Y: "Q1 2025" quarterly feel, use "Mar 2025"
-      return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+      // 1Y/2Y: "Mar 25" compact month + short year
+      const mon = d.toLocaleDateString("en-US", { month: "short" });
+      const yr = String(d.getFullYear()).slice(2);
+      return `${mon} ${yr}`;
     }
-    if (spanYears <= 5) {
-      // 5Y: "2023" yearly
-      return d.getFullYear().toString();
-    }
-    // All: "2000" yearly, sparser
+    // 5Y/All: year only
     return d.getFullYear().toString();
   }
-
-  // Tick density adapts to range
-  const minGap =
-    spanYears <= 1 ? 40 : spanYears <= 2 ? 60 : spanYears <= 5 ? 50 : 80;
 
   return (
     <div>
@@ -124,7 +150,7 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             dataKey="date"
             tick={{ fill: "#8888a0", fontSize: 11 }}
             tickFormatter={formatXTick}
-            minTickGap={minGap}
+            ticks={xTicks}
           />
           <YAxis tick={{ fill: "#8888a0", fontSize: 11 }} width={50} />
           <Tooltip
