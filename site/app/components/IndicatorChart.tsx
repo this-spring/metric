@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -9,7 +9,6 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Brush,
 } from "recharts";
 
 interface DataPoint {
@@ -30,60 +29,44 @@ const TIME_RANGES = [
 ];
 
 export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
-  // Downsample if too many points for performance
-  const sampled =
-    data.length > 500
-      ? data.filter((_, i) => i % Math.ceil(data.length / 500) === 0)
-      : data;
+  const [activeRange, setActiveRange] = useState("All");
 
-  // Default to showing last 20% of data (recent trends)
-  const defaultStart = Math.floor(sampled.length * 0.8);
-  const [brushRange, setBrushRange] = useState({
-    startIndex: defaultStart,
-    endIndex: sampled.length - 1,
-  });
-  const [activeRange, setActiveRange] = useState<string | null>(null);
-  const [lockedSpan, setLockedSpan] = useState<number | null>(null);
-
-  function setTimeRange(years: number, label: string) {
-    if (years === 0) {
-      setBrushRange({ startIndex: 0, endIndex: sampled.length - 1 });
-      setActiveRange(label);
-      setLockedSpan(null);
-      return;
-    }
+  // Filter data by selected time range
+  const filteredData = useMemo(() => {
+    const range = TIME_RANGES.find((r) => r.label === activeRange);
+    if (!range || range.years === 0) return data;
     const now = new Date();
     const cutoff = new Date(
-      now.getFullYear() - years,
+      now.getFullYear() - range.years,
       now.getMonth(),
       now.getDate()
     );
-    let startIdx = 0;
-    for (let i = 0; i < sampled.length; i++) {
-      if (new Date(sampled[i].date) >= cutoff) {
-        startIdx = i;
-        break;
-      }
-    }
-    const span = sampled.length - 1 - startIdx;
-    setBrushRange({ startIndex: startIdx, endIndex: sampled.length - 1 });
-    setActiveRange(label);
-    setLockedSpan(span);
-  }
+    return data.filter((d) => new Date(d.date) >= cutoff);
+  }, [data, activeRange]);
 
-  // Determine visible time span to pick the right X-axis format
-  const visibleStart = sampled[brushRange.startIndex]?.date;
-  const visibleEnd = sampled[brushRange.endIndex]?.date;
-  const spanYears =
-    visibleStart && visibleEnd
-      ? (new Date(visibleEnd).getTime() - new Date(visibleStart).getTime()) /
-        (365.25 * 24 * 3600 * 1000)
-      : 99;
+  // Downsample for rendering performance
+  const sampled = useMemo(() => {
+    if (filteredData.length <= 300) return filteredData;
+    const step = Math.ceil(filteredData.length / 300);
+    const result = filteredData.filter((_, i) => i % step === 0);
+    // Always include the last point
+    const last = filteredData[filteredData.length - 1];
+    if (result[result.length - 1] !== last) result.push(last);
+    return result;
+  }, [filteredData]);
+
+  // Compute visible time span for tick formatting
+  const spanYears = useMemo(() => {
+    if (sampled.length < 2) return 1;
+    const start = new Date(sampled[0].date).getTime();
+    const end = new Date(sampled[sampled.length - 1].date).getTime();
+    return (end - start) / (365.25 * 24 * 3600 * 1000);
+  }, [sampled]);
 
   function formatXTick(v: string) {
     const d = new Date(v);
     if (isNaN(d.getTime())) return v;
-    if (spanYears <= 2) {
+    if (spanYears <= 1) {
       return d.toLocaleDateString("en-US", { year: "numeric", month: "short" });
     }
     if (spanYears <= 5) {
@@ -92,8 +75,9 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
     return d.getFullYear().toString();
   }
 
-  // Shorter time ranges → smaller tick gap → more labels
-  const minGap = spanYears <= 1 ? 30 : spanYears <= 2 ? 40 : spanYears <= 5 ? 50 : 60;
+  // Shorter ranges → denser ticks
+  const minGap =
+    spanYears <= 1 ? 30 : spanYears <= 2 ? 40 : spanYears <= 5 ? 50 : 80;
 
   return (
     <div>
@@ -105,10 +89,10 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
           flexWrap: "wrap",
         }}
       >
-        {TIME_RANGES.map(({ label, years }) => (
+        {TIME_RANGES.map(({ label }) => (
           <button
             key={label}
-            onClick={() => setTimeRange(years, label)}
+            onClick={() => setActiveRange(label)}
             style={{
               padding: "3px 12px",
               borderRadius: 6,
@@ -160,53 +144,6 @@ export default function IndicatorChart({ data, color = "#6c8cff" }: Props) {
             strokeWidth={1.5}
             dot={false}
             isAnimationActive={false}
-          />
-          <Brush
-            dataKey="date"
-            height={24}
-            stroke="#2a2a3e"
-            fill="#0d0d1a"
-            travellerWidth={6}
-            startIndex={brushRange.startIndex}
-            endIndex={brushRange.endIndex}
-            onChange={(range) => {
-              if (
-                !range ||
-                range.startIndex === undefined ||
-                range.endIndex === undefined
-              )
-                return;
-
-              if (lockedSpan !== null && lockedSpan > 0) {
-                // Keep window size fixed when a time range is active
-                const newMid =
-                  (range.startIndex + range.endIndex) / 2;
-                let newStart = Math.round(newMid - lockedSpan / 2);
-                let newEnd = newStart + lockedSpan;
-                if (newStart < 0) {
-                  newStart = 0;
-                  newEnd = lockedSpan;
-                }
-                if (newEnd > sampled.length - 1) {
-                  newEnd = sampled.length - 1;
-                  newStart = newEnd - lockedSpan;
-                }
-                setBrushRange({
-                  startIndex: Math.max(0, newStart),
-                  endIndex: Math.min(sampled.length - 1, newEnd),
-                });
-              } else {
-                setBrushRange({
-                  startIndex: range.startIndex,
-                  endIndex: range.endIndex,
-                });
-                setActiveRange(null);
-              }
-            }}
-            tickFormatter={(v: string) => {
-              const d = new Date(v);
-              return isNaN(d.getTime()) ? "" : d.getFullYear().toString();
-            }}
           />
         </LineChart>
       </ResponsiveContainer>

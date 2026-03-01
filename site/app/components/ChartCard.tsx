@@ -1,6 +1,24 @@
 "use client";
 
-import IndicatorChart from "./IndicatorChart";
+import dynamic from "next/dynamic";
+
+const IndicatorChart = dynamic(() => import("./IndicatorChart"), {
+  ssr: false,
+  loading: () => (
+    <div
+      style={{
+        height: 300,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#555570",
+        fontSize: 13,
+      }}
+    >
+      Loading chart...
+    </div>
+  ),
+});
 
 interface DataPoint {
   date: string;
