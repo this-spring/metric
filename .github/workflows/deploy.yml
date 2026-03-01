@@ -42,20 +42,21 @@ jobs:
           NEXT_PUBLIC_BASE_PATH: /ai-me
         run: npm run build
 
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H sspprriinngg.cn >> ~/.ssh/known_hosts 2>/dev/null
+
       - name: Deploy via rsync
-        uses: easingthemes/ssh-deploy@v4
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          REMOTE_HOST: sspprriinngg.cn
-          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
-          SOURCE: site/out/
-          TARGET: /var/www/html/ai-me/
-          ARGS: "-avz --delete --exclude='preview/'"
+        run: |
+          rsync -avz --delete --exclude='preview/' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            site/out/ ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn:/var/www/html/ai-me/
 
       - name: Cleanup old PR previews
-        uses: appleboy/ssh-action@v1
-        with:
-          host: sspprriinngg.cn
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: rm -rf /var/www/html/ai-me/preview/
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn \
+            "rm -rf /var/www/html/ai-me/preview/"
