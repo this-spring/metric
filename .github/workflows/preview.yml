@@ -6,6 +6,7 @@ on:
     paths:
       - "site/**"
       - "data/**"
+      - "fetcher/**"
 
 jobs:
   preview:
@@ -20,6 +21,18 @@ jobs:
           node-version: "20"
           cache: npm
           cache-dependency-path: site/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch latest indicator data
+        run: |
+          cd fetcher
+          pip install -r requirements.txt
+          python main.py || true
+          cd ..
 
       - name: Copy data into site public directory
         run: |
