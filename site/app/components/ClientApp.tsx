@@ -16,14 +16,22 @@ interface IndicatorData {
   data: DataPoint[];
 }
 
+interface CategoryGroup {
+  key: string;
+  indicators: string[];
+}
+
 interface Props {
   indicators: IndicatorData[];
   colors: Record<string, string>;
   basePath: string;
+  categories: CategoryGroup[];
 }
 
-function Dashboard({ indicators, colors, basePath }: Props) {
+function Dashboard({ indicators, colors, basePath, categories }: Props) {
   const { locale, t, toggleLocale } = useI18n();
+
+  const indicatorMap = new Map(indicators.map((ind) => [ind.name, ind]));
 
   return (
     <main
@@ -98,20 +106,44 @@ function Dashboard({ indicators, colors, basePath }: Props) {
           </p>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gap: 24,
-            gridTemplateColumns: "1fr",
-          }}
-        >
-          {indicators.map((ind) => (
-            <ChartCard
-              key={ind.name}
-              indicator={ind}
-              color={colors[ind.name]}
-            />
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
+          {categories.map((cat) => {
+            const catIndicators = cat.indicators
+              .map((name) => indicatorMap.get(name))
+              .filter((ind): ind is IndicatorData => !!ind);
+            if (catIndicators.length === 0) return null;
+            return (
+              <section key={cat.key}>
+                <h2
+                  style={{
+                    fontSize: "clamp(16px, 4vw, 20px)",
+                    fontWeight: 600,
+                    color: "#c0c0d0",
+                    marginBottom: 16,
+                    paddingBottom: 8,
+                    borderBottom: "1px solid #2a2a3e",
+                  }}
+                >
+                  {t.categories[cat.key] || cat.key}
+                </h2>
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 24,
+                    gridTemplateColumns: "1fr",
+                  }}
+                >
+                  {catIndicators.map((ind) => (
+                    <ChartCard
+                      key={ind.name}
+                      indicator={ind}
+                      color={colors[ind.name]}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       )}
 

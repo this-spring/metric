@@ -11,6 +11,17 @@ const COLORS: Record<string, string> = {
   hsi: "#cc66ff",
 };
 
+export interface CategoryGroup {
+  key: string;
+  indicators: string[];
+}
+
+const CATEGORIES: CategoryGroup[] = [
+  { key: "us", indicators: ["sp500_pe", "nasdaq_pe", "vix"] },
+  { key: "cn", indicators: ["sse_composite", "csi300"] },
+  { key: "hk", indicators: ["hsi"] },
+];
+
 interface DataPoint {
   date: string;
   value: number;
@@ -56,6 +67,6 @@ export default function Home() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
   return (
-    <ClientApp indicators={indicators} colors={COLORS} basePath={basePath} />
+    <ClientApp indicators={indicators} colors={COLORS} basePath={basePath} categories={CATEGORIES} />
   );
 }
