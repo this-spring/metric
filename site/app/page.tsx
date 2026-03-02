@@ -6,6 +6,9 @@ const COLORS: Record<string, string> = {
   sp500_pe: "#6c8cff",
   nasdaq_pe: "#ff6ca8",
   vix: "#ffa84c",
+  sse_composite: "#ff5555",
+  csi300: "#55cc77",
+  hsi: "#cc66ff",
 };
 
 interface DataPoint {
