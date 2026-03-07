@@ -50,6 +50,7 @@ jobs:
               - Code style consistency with the project
 
             ### 3. Build verification
+            - Run: `cd fetcher && pip install -r requirements.txt && python main.py || true && cd ..`
             - Run: `mkdir -p site/public/data && cp data/*.json site/public/data/`
             - Run: `cd site && npm ci && npm run build`
             - Verify `site/out/index.html` exists

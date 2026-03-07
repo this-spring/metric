@@ -6,7 +6,21 @@ const COLORS: Record<string, string> = {
   sp500_pe: "#6c8cff",
   nasdaq_pe: "#ff6ca8",
   vix: "#ffa84c",
+  sse_composite: "#ff5555",
+  csi300: "#55cc77",
+  hsi: "#cc66ff",
 };
+
+export interface CategoryGroup {
+  key: string;
+  indicators: string[];
+}
+
+const CATEGORIES: CategoryGroup[] = [
+  { key: "us", indicators: ["sp500_pe", "nasdaq_pe", "vix"] },
+  { key: "cn", indicators: ["sse_composite", "csi300"] },
+  { key: "hk", indicators: ["hsi"] },
+];
 
 interface DataPoint {
   date: string;
@@ -53,6 +67,6 @@ export default function Home() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
   return (
-    <ClientApp indicators={indicators} colors={COLORS} basePath={basePath} />
+    <ClientApp indicators={indicators} colors={COLORS} basePath={basePath} categories={CATEGORIES} />
   );
 }
