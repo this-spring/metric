@@ -64,6 +64,18 @@ jobs:
           rsync -avz --delete \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             site/out/ ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn:/var/www/html/metric/preview/pr-${{ github.event.pull_request.number }}/
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.DEPLOY_USER }}@sspprriinngg.cn \
+            "chmod -R 755 /var/www/html/metric/preview/"
+
+      - name: Verify deployment
+        run: |
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "https://sspprriinngg.cn/metric/preview/pr-${{ github.event.pull_request.number }}/")
+          echo "HTTP status: $HTTP_CODE"
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Preview deployment verification failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
 
       - name: Comment preview URL
         uses: actions/github-script@v7
